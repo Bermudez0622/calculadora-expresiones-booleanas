@@ -16,6 +16,7 @@ import java.util.List;
 public class Main {
 
     private static Map<String, Integer> operators = new HashMap<>();
+    private static Map<String, Set<String>> tokens = new HashMap<>();
 
     static {
         operators.put("(", 0);
@@ -82,15 +83,19 @@ public class Main {
                 while (!isLeftBrackets(stack.peek())) {
                     result.append(format(stack.pop()));
                 }
+                tokens.get("delimiters").add("()");
                 stack.pop();
             } else if (isNegation(item)) {
                 hasNegation = true;
+                tokens.get("operators").add(item);
             } else if (isOperator(item)) {
+                tokens.get("operators").add(item);
                 while (!stack.isEmpty() && getPriority(item) < getPriority(stack.peek())) {
                     result.append(format(stack.pop()));
                 }
                 stack.push(item);
             } else {
+                tokens.get("identifiers").add(item);
                 if(hasNegation) {
                     result.append(format("~" + item));
                     hasNegation = false;
@@ -143,6 +148,9 @@ public class Main {
                 }
             }
         }
+
+        System.out.println("Tokens: " + tokens);
+
         return stack.pop();
     }
 
@@ -150,6 +158,9 @@ public class Main {
         Scanner scan = new Scanner(System.in);
 
         while (scan.hasNextLine()) {
+            tokens.put("delimiters", new TreeSet<>());
+            tokens.put("operators", new TreeSet<>());
+            tokens.put("identifiers", new TreeSet<>());
             System.out.println(calculate(scan.nextLine()));
         }
 
